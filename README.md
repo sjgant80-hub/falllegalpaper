@@ -59,7 +59,7 @@ Vanilla JS, single file, no build, no dependencies, no CDN. Drop-in clone of the
 - **Storage:** IndexedDB store, KONOMI key/value shim with localStorage fallback. Stores: `firms`, `advisers`, `clients`, `matters`, `documents`, `templates`, `audit`, `state`.
 - **Schema:** conforms to `LAW-BUNDLE-SHARED-SCHEMA.md` v1.0. `Matter`, `LegalClient`, `LegalAdviser` records keyed by `id`. Shared `firm` record.
 - **Mesh:** `BroadcastChannel('fall-law')` for client/matter/document sync (`sync.request`, `sync.snapshot`, `client.*`, `matter.*`, `document.created`, `firm.updated`). `BroadcastChannel('fall-signal')` for the wider estate mesh (`hello`, `ping`/`pong`).
-- **Audit chain:** Mansoor P3 extended. Every state-changing action appends `{i, ts, action, prevHash, payload, docHash}`. SHA-256 chained from `GENESIS`. Verifiable via the Audit tab. 6-year retention per SRA rule 13.5.
+- **Audit chain:** P3 extended. Every state-changing action appends `{i, ts, action, prevHash, payload, docHash}`. SHA-256 chained from `GENESIS`. Verifiable via the Audit tab. 6-year retention per SRA rule 13.5.
 - **Template engine:** `{id, name, version, practiceArea, sections[]}` where each section is `{id, heading, body, requiredFields, locked}`. Placeholder syntax `{{client.firstName}}`, `{{matter.ref}}`, `{{firm.name}}`, `{{today}}`, `{{ctx.*}}`. Bodies are mini-Markdown (`**bold**`, `-` lists, `1.` ordered, `---` rule, `[SIGNATURE_BLOCK]` macro). Locked sections render with the ⛯ padlock and `contenteditable=false`.
 - **Constants:** `TOOLNAME='falllegalpaper'`, `VERSION='1.0.0'`, `PRIME=757`.
 - **Document record (per shared schema):** `{id, clientId, matterId, templateId, version, title, html, markdown, sha256, generatedAt, generatedBy, signed, signedAt, signatureHash}`.
@@ -72,10 +72,10 @@ Vanilla JS, single file, no build, no dependencies, no CDN. Drop-in clone of the
 ### Verify in-browser
 
 ```js
-window.FALL_LEGAL_PAPER       // {state, TOOLNAME, VERSION, PRIME, renderTemplate, renderMarkdown, sha256, T0_RULES, SEED_TEMPLATES}
-window.FALL_LEGAL_PAPER.state.templates.length    // 15
-window.FALL_LEGAL_PAPER.state.audit.length        // grows with every action
-window.FALL_LEGAL_PAPER.T0_RULES.length           // 12
+window.FALL_LEGAL_PAPER // {state, TOOLNAME, VERSION, PRIME, renderTemplate, renderMarkdown, sha256, T0_RULES, SEED_TEMPLATES}
+window.FALL_LEGAL_PAPER.state.templates.length // 15
+window.FALL_LEGAL_PAPER.state.audit.length // grows with every action
+window.FALL_LEGAL_PAPER.T0_RULES.length // 12
 ```
 
 ### Files
