@@ -161,22 +161,19 @@ main{padding:18px 22px 60px;overflow-y:auto;max-width:1320px;margin:0 auto;width
     'llama-3b':  { id: 'Llama-3.2-3B-Instruct-q4f16_1-MLC',   size: '~2GB',   label: '3B · balanced · default · most laptops' },
     'qwen-7b':   { id: 'Qwen2.5-7B-Instruct-q4f16_1-MLC',     size: '~5GB',   label: '7B · capable · needs decent GPU (M-series Mac / 8GB+ VRAM)' },
     'llama-8b':  { id: 'Llama-3.1-8B-Instruct-q4f16_1-MLC',   size: '~5GB',   label: '8B · common · needs decent GPU' },
-    'llama-70b': { id: 'Llama-3.1-70B-Instruct-q4f16_1-MLC',  size: '~40GB',  label: '70B · frontier · needs serious GPU + 64GB+ RAM' },
-  };
+    'llama-70b': { id: 'Llama-3.1-70B-Instruct-q4f16_1-MLC',  size: '~40GB',  label: '70B · frontier · needs serious GPU + 64GB+ RAM' }};
   const DEFAULT_MODEL = 'llama-3b';
 
   const T3_PROVIDERS = {
     anthropic: { label: 'Anthropic Claude', models: ['claude-sonnet-4-5','claude-opus-4-7','claude-haiku-4-5'], default: 'claude-sonnet-4-5', url: 'https://api.anthropic.com/v1/messages' },
     openai:    { label: 'OpenAI',           models: ['gpt-4o','gpt-4o-mini','o1-mini'],                          default: 'gpt-4o-mini',      url: 'https://api.openai.com/v1/chat/completions' },
-    google:    { label: 'Google Gemini',    models: ['gemini-1.5-pro','gemini-1.5-flash','gemini-2.0-flash-exp'], default: 'gemini-1.5-flash', url: 'https://generativelanguage.googleapis.com/v1beta/models/' },
-  };
+    google:    { label: 'Google Gemini',    models: ['gemini-1.5-pro','gemini-1.5-flash','gemini-2.0-flash-exp'], default: 'gemini-1.5-flash', url: 'https://generativelanguage.googleapis.com/v1beta/models/' }};
 
   // ─── State ───────────────────────────────────────────────────────
   const STATE = {
     config: loadConfig(),
     ai: { ready: false, loading: false, progress: 0, engine: null, model: null },
-    mesh: { active: false, peers: new Map(), bc: null, signal: null },
-  };
+    mesh: { active: false, peers: new Map(), bc: null, signal: null }};
 
   function loadConfig() {
     try { return JSON.parse(localStorage.getItem('fall-kit.config') || '{}'); }
@@ -243,8 +240,7 @@ main{padding:18px 22px 60px;overflow-y:auto;max-width:1320px;margin:0 auto;width
     if (tier === 'T2' && STATE.ai.ready && STATE.ai.engine) {
       const r = await STATE.ai.engine.chat.completions.create({
         messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userMsg }],
-        max_tokens: maxTokens,
-      });
+        max_tokens: maxTokens});
       return r.choices[0].message.content;
     }
     if (tier === 'T3' && STATE.config.api_key && STATE.config.api_provider) {
@@ -261,8 +257,7 @@ main{padding:18px 22px 60px;overflow-y:auto;max-width:1320px;margin:0 auto;width
       const r = await fetch(T3_PROVIDERS.anthropic.url, {
         method: 'POST',
         headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-        body: JSON.stringify({ model, max_tokens: maxTokens, system: sys, messages: [{ role: 'user', content: msg }] }),
-      });
+        body: JSON.stringify({ model, max_tokens: maxTokens, system: sys, messages: [{ role: 'user', content: msg }] })});
       if (!r.ok) throw new Error('Anthropic ' + r.status + ': ' + (await r.text()).slice(0, 200));
       const j = await r.json();
       return j.content[0].text;
@@ -271,8 +266,7 @@ main{padding:18px 22px 60px;overflow-y:auto;max-width:1320px;margin:0 auto;width
       const r = await fetch(T3_PROVIDERS.openai.url, {
         method: 'POST',
         headers: { 'content-type': 'application/json', 'Authorization': 'Bearer ' + key },
-        body: JSON.stringify({ model, max_tokens: maxTokens, messages: [{ role: 'system', content: sys }, { role: 'user', content: msg }] }),
-      });
+        body: JSON.stringify({ model, max_tokens: maxTokens, messages: [{ role: 'system', content: sys }, { role: 'user', content: msg }] })});
       if (!r.ok) throw new Error('OpenAI ' + r.status);
       const j = await r.json();
       return j.choices[0].message.content;
@@ -281,8 +275,7 @@ main{padding:18px 22px 60px;overflow-y:auto;max-width:1320px;margin:0 auto;width
       const r = await fetch(T3_PROVIDERS.google.url + model + ':generateContent?key=' + encodeURIComponent(key), {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: sys + '\n\n---\n\n' + msg }] }], generationConfig: { maxOutputTokens: maxTokens } }),
-      });
+        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: sys + '\n\n---\n\n' + msg }] }], generationConfig: { maxOutputTokens: maxTokens } })});
       if (!r.ok) throw new Error('Google ' + r.status);
       const j = await r.json();
       return j.candidates[0].content.parts[0].text;
@@ -523,8 +516,7 @@ main{padding:18px 22px 60px;overflow-y:auto;max-width:1320px;margin:0 auto;width
     openMint: openMint,  // v1.2 · launch kcc-mint with this seed prefilled as parent
     MODELS: WEBLLM_MODELS,
     PROVIDERS: T3_PROVIDERS,
-    state: STATE,
-  };
+    state: STATE};
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
@@ -774,7 +766,7 @@ sec('payments-on-account','6. Payments on account',
 sec('complaints','7. Complaints and the Legal Ombudsman',
 'We are committed to providing high-quality legal services. If you are unhappy with any aspect of our service, please raise it first with **{{adviser.name}}**, and if not resolved, with our complaints partner **{{firm.complaintsPartner}}**. We will acknowledge your complaint within **5 working days** and provide a substantive response within **8 weeks**.\n\nIf you are not satisfied with our final response (or if 8 weeks have passed without one), you may refer the complaint to the **Legal Ombudsman**:\n\n- Address: PO Box 6167, Slough, SL1 0EH\n- Telephone: 0300 555 0333\n- Email: enquiries@legalombudsman.org.uk\n- Web: https://www.legalombudsman.org.uk\n\nNormally you must refer the complaint **within 6 months** of our final response, **and within 1 year of the act or omission complained of (or within 1 year of when you should reasonably have known of it)**. The Legal Ombudsman may extend these limits in exceptional circumstances.\n\nIf your complaint concerns our **professional conduct** (breach of the SRA Code), report it to the **Solicitors Regulation Authority** at https://www.sra.org.uk/consumers/problems/report-solicitor/.',[],true),
 sec('pi','8. Professional Indemnity Insurance',
-'We hold professional indemnity insurance with **{{firm.piInsurer}}** (policy no. {{firm.piPolicyNo}}), expiring {{firm.piExpiryDateText}}. Our minimum level of cover meets the SRA Minimum Terms and Conditions (£2,000,000 per claim, or £3,000,000 for incorporated practices). The territorial scope is England & Wales.',[],true),
+'We hold professional indemnity insurance with **{{firm.piInsurer}}** (policy no. {{firm.piPolicyNo}}), expiring {{firm.piExpiryDateText}}. Our minimum level of cover meets the SRA Minimum Terms and Conditions (TBA per claim, or TBA for incorporated practices). The territorial scope is England & Wales.',[],true),
 sec('liability','9. Limitation of our liability',
 'Subject to the SRA Minimum Terms, and except where prohibited by law, our aggregate liability to you for losses arising from this retainer is **limited to £{{firm.liabilityCap}}** (or, if higher, the limit of our PI cover for this matter). We do not exclude liability for fraud, death or personal injury caused by our negligence, or any liability that cannot lawfully be excluded.',[]),
 sec('storage','10. File storage and retention',
@@ -796,7 +788,7 @@ sec('fees','3. Fees, billing and payment terms',
 sec('client-money','4. Client money',
 'Money received from or on behalf of you will be held in our **client account** in accordance with the **SRA Accounts Rules 2019**. We will not use client money to pay our own bills without first sending you an invoice (or notification of costs incurred) and giving you reasonable opportunity to query it. Interest will be accounted for under our Interest Policy (clause 5).',[],true),
 sec('interest','5. Interest policy',
-'We will account to you for a fair sum of interest on client money held by us, in accordance with **SRA rule 7**. The rate paid will be that paid by our client account bank from time to time. We will not account for interest where the amount is less than **£20**, or where money is held for less than **8 weeks**, save in exceptional circumstances.',[],true),
+'We will account to you for a fair sum of interest on client money held by us, in accordance with **SRA rule 7**. The rate paid will be that paid by our client account bank from time to time. We will not account for interest where the amount is less than **TBA**, or where money is held for less than **8 weeks**, save in exceptional circumstances.',[],true),
 sec('liability','6. Limitation of liability',
 'Our aggregate liability to you arising from any retainer is limited to **£{{firm.liabilityCap}}**, or such higher amount agreed in writing in the engagement letter, subject always to the SRA Minimum Terms and Conditions of PI insurance. We do not limit liability for fraud, death or personal injury caused by our negligence, or any liability that cannot lawfully be excluded.',[]),
 sec('confidentiality','7. Confidentiality and disclosure',
@@ -835,7 +827,7 @@ sec('factors','5. Factors that may affect cost',
 sec('timescales','6. Timescales',
 'A straightforward matter of this type typically takes **{{matter.typicalDurationText}}**. We will keep you updated at least every **6 weeks** and tell you promptly if the timescale changes materially.',[]),
 sec('update','7. Costs updates',
-'We will update this costs information in writing **at least every 6 months**, or whenever cumulative costs reach a further £1,000, or whenever there is a material change.',[],true),
+'We will update this costs information in writing **at least every 6 months**, or whenever cumulative costs reach a further TBA, or whenever there is a material change.',[],true),
 sec('paying','8. Funding options',
 'Depending on the matter, you may be eligible for: legal expenses insurance ("BTE"); a Conditional Fee Agreement; a Damages-Based Agreement; Trade Union funding; Legal Aid (limited categories only). Please discuss with your solicitor.',[])
 ]),
@@ -1030,7 +1022,7 @@ sec('preferences','4. Preferences and instructions',
 sec('certificate','5. Certificate provider',
 'A certificate provider must confirm that the Donor understands the LPA and is not under undue pressure. Two options: (a) someone who has known the Donor personally for 2+ years (excluding family); or (b) someone with relevant professional skill (solicitor, GP). The certificate provider must complete page 10 of the LP1F.',[],true),
 sec('register','6. Registration with OPG',
-'The LPA must be **registered with the OPG before it can be used**. The current registration fee is **£82 per LPA** (2024/25 rate — verify before submission). Fee remissions and exemptions apply for low-income donors.\n\nRegistration typically takes **8–10 weeks** from receipt by the OPG. People to be notified ("named persons") must be notified before registration.',[],true),
+'The LPA must be **registered with the OPG before it can be used**. The current registration fee is **TBA per LPA** (2024/25 rate — verify before submission). Fee remissions and exemptions apply for low-income donors.\n\nRegistration typically takes **8–10 weeks** from receipt by the OPG. People to be notified ("named persons") must be notified before registration.',[],true),
 sec('safeguards','7. Safeguards',
 '- The Donor must have **mental capacity** at the time of execution (MCA 2005 s.2-s.3 test).\n- The Donor must not be under **undue influence**.\n- The LPA must be **signed in the correct order** (Donor → Certificate Provider → Attorney(s) → Replacement attorney(s)).\n- Attorneys are subject to the **fiduciary duties** under MCA 2005, must act in the donor\'s best interests (s.4) and may be held to account by the Court of Protection and OPG.',[],true)
 ]),
@@ -1186,7 +1178,7 @@ function mdToHtml(md){
   s=s.replace(/&lt;span class=&quot;placeholder-empty&quot;&gt;/g,'<span class="placeholder-empty">')
      .replace(/&lt;\/span&gt;/g,'</span>');
   s=s.replace(/\[SIGNATURE_BLOCK\]/g,'<div class="sig-block"><strong>Signed:</strong> ______________________________  <strong>Date:</strong> ____________<br><br><strong>Print name:</strong> ______________________________</div>');
-  s=s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  s=s.replace(/\*\*(.+?)\*\*/g,'<strong>TBA</strong>');
   const lines=s.split('\n');
   let out=[],inUL=false,inOL=false;
   for(let line of lines){
@@ -1286,7 +1278,7 @@ h3{font-size:13px}
 /* ============================== T0 RULES ============================== */
 const T0_RULES=[
   {q:'When must the engagement letter be sent?',a:'Before, or as soon as practicable after, accepting the retainer. SRA Code paras 8.6 and 8.7 require you to give the client information about regulatory status, complaints, costs and the service you will provide at the outset.'},
-  {q:'What do SRA Transparency Rules require on costs?',a:'For specified work types (residential conveyancing, probate (uncontested, of UK estate), immigration (excl. asylum), motoring offences (summary), employment tribunal claims, debt recovery up to £100k, licensing applications for business premises) the firm must publish prices, the basis of those prices, disbursements, and key information on the website. For all matters, para 8.7 still requires the best possible information about cost.'},
+  {q:'What do SRA Transparency Rules require on costs?',a:'For specified work types (residential conveyancing, probate (uncontested, of UK estate), immigration (excl. asylum), motoring offences (summary), employment tribunal claims, debt recovery up to TBAk, licensing applications for business premises) the firm must publish prices, the basis of those prices, disbursements, and key information on the website. For all matters, para 8.7 still requires the best possible information about cost.'},
   {q:'What is the cap on a CFA success fee?',a:'100% of base costs (statutory cap, Article 3 of the Conditional Fee Agreements Order 2013). In personal injury cases there is an additional cap of 25% of damages (excluding future-care and future-loss damages) — Article 5.'},
   {q:'What is the cap on a DBA payment?',a:'25% of damages in personal injury (first instance), 35% in employment tribunal claims, 50% in all other civil/commercial claims (first instance). All caps INCLUDE VAT (DBA Regs 2013, regs 4 and 7).'},
   {q:'What are the client-care requirements?',a:'SRA Code paras 8.6–8.11: tell the client at the outset who is handling their matter, their status, supervisors; complaints right (LeO and SRA routes); pricing/costs information; regulatory information about the firm. Update these whenever materially changed.'},
@@ -1295,7 +1287,7 @@ const T0_RULES=[
   {q:'How should we handle a vulnerable client?',a:'(1) Identify drivers — health, life event, resilience, capability. (2) Capacity test under MCA 2005 s.3 is decision-specific and time-specific; presume capacity. (3) Adjust communication: plain English, extra time, written follow-up, trusted-third-party support (not substitute). (4) Take instructions in private if undue influence suspected. (5) Document everything; review at every substantive meeting.'},
   {q:'What is the position on section 21 reform?',a:'Successive UK governments have committed to abolishing s.21 "no-fault" evictions for ASTs. As at June 2026, check the commencement position of the Renters\' Rights Act provisions — once commenced, only s.8 ground-based possession will be available. Wales already moved to the Renting Homes (Wales) Act 2016 model.'},
   {q:'What are the grounds for challenging a Will?',a:'(1) Lack of testamentary capacity (Banks v Goodfellow). (2) Lack of knowledge and approval. (3) Undue influence (high bar — actual influence, not just opportunity). (4) Forgery / fraud. (5) Improper execution under Wills Act 1837 s.9. (6) Revocation. Separately under the Inheritance (Provision for Family and Dependants) Act 1975 — claim for reasonable financial provision (not a challenge to the will itself).'},
-  {q:'What is the LPA registration fee?',a:'£82 per LPA (one fee for Property & Financial Affairs, one for Health & Welfare) — Office of the Public Guardian 2024/25 rate (verify before submission, fees periodically updated). Remissions and exemptions are available for donors on low income or in receipt of certain means-tested benefits.'},
+  {q:'What is the LPA registration fee?',a:'TBA per LPA (one fee for Property & Financial Affairs, one for Health & Welfare) — Office of the Public Guardian 2024/25 rate (verify before submission, fees periodically updated). Remissions and exemptions are available for donors on low income or in receipt of certain means-tested benefits.'},
   {q:'When must ATE insurance be disclosed?',a:'Since 1 April 2013 (LASPO), ATE premiums are no longer recoverable from the losing opponent (except, in clinical negligence cases, the part of the premium relating to expert reports on liability and causation). The client must be told this clearly. CPR 44 requires costs budgeting/management which records insurance position. The client must also be advised on alternative funding options before signing any CFA or DBA (SRA Code para 8.7).'}
 ];
 
