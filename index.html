@@ -1259,7 +1259,26 @@ h3{font-size:13px}
 .locked-clause{padding:6px 10px;background:rgba(184,151,74,0.06);border-left:2px solid #b8974a;margin:6px 0}
 .sig-block{margin-top:24px;padding:14px;border:1px dashed #cfc7b3}
 .placeholder-empty{background:#ffe9b3;color:#8b1a1a;padding:0 4px}</style>
-</head><body><div class="paper">${innerHtml}</div></body></html>`;
+</head><body><div class="paper">${innerHtml}</div>
+
+<!-- ═══════════════════════ AUTOPILOT · fall-autopilot-kit ═══════════════════════ -->
+<script type="module">
+  try {
+    const { installAutopilot } = await import('https://sjgant80-hub.github.io/fall-autopilot-kit/src/autopilot.js');
+    const manifestRes = await fetch('https://sjgant80-hub.github.io/fall-autopilot-kit/manifests/falllegalpaper.json');
+    const manifest = await manifestRes.json();
+    manifest.actions = manifest.actions.map(a => ({ ...a, run: async (params) => {
+      const fn = window._app?.[a.id];
+      if (typeof fn === 'function') return fn(params);
+      alert('Autopilot proposes: ' + a.name + ' · params: ' + JSON.stringify(params) + '\n\nThis tool has not yet implemented the ' + a.id + ' handler. Proposal logged to audit.');
+      return { stub: true, action: a.id, params };
+    }}));
+    manifest.state = () => ({ ...(window._app || {}), now: new Date().toISOString() });
+    installAutopilot(manifest);
+  } catch (e) { console.warn('[autopilot] init failed:', e); }
+</script>
+
+</body></html>`;
 }
 
 /* ============================== T0 RULES ============================== */
