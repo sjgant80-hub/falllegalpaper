@@ -1759,7 +1759,7 @@ function mdToHtml(md){
   s=s.replace(/&lt;span class=&quot;placeholder-empty&quot;&gt;/g,'<span class="placeholder-empty">')
      .replace(/&lt;\/span&gt;/g,'</span>');
   s=s.replace(/\[SIGNATURE_BLOCK\]/g,'<div class="sig-block"><strong>Signed:</strong> ______________________________  <strong>Date:</strong> ____________<br><br><strong>Print name:</strong> ______________________________</div>');
-  s=s.replace(/\*\*(.+?)\*\*/g,'<strong>TBA</strong>');
+  s=s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
   const lines=s.split('\n');
   let out=[],inUL=false,inOL=false;
   for(let line of lines){
