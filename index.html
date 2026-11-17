@@ -1175,7 +1175,8 @@ const state={
 const $=s=>document.querySelector(s);
 const now=()=>Date.now();
 const uuid=()=>(crypto&&crypto.randomUUID)?crypto.randomUUID():'x'+Math.random().toString(36).slice(2)+now();
-const esc=s=>(s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const esc = (s) => (s == null ? '' : toText(s)).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function toText(v) { try { return String(v); } catch (_) { return ''; } }
 const toast=(m,kind)=>{const t=document.createElement('div');t.className='toast';if(kind==='err'||kind===1)t.style.borderColor='var(--red)';t.textContent=m;$('#toasts').appendChild(t);setTimeout(()=>t.remove(),3200);};
 const fmtDT=ts=>!ts?'—':new Date(ts).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit'});
 const today=()=>new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
@@ -1184,7 +1185,7 @@ async function sha256(s){
   const h=await crypto.subtle.digest('SHA-256',buf);
   return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
-function get(obj,path){return path.split('.').reduce((o,k)=>(o==null?undefined:o[k]),obj);}
+function get(obj, path) { return String(path).split('.').reduce((o, k) => (o == null ? undefined : o[k]), obj); }
 
 /* ============================== IDB ============================== */
 const STORES=['firms','advisers','clients','matters','documents','templates','audit','state'];
@@ -1324,7 +1325,7 @@ async function onLawMessage(e){
 function tplDef(id,name,practiceArea,sections){
   return {id,name,version:'1.0.0',practiceArea,custom:false,sections,createdAt:now(),updatedAt:now()};
 }
-function sec(id,heading,body,req,locked){return {id,heading,body,requiredFields:req||[],locked:!!locked};}
+function sec(id, heading, body, req, locked) { return { id, heading, body, requiredFields: req || [], locked: !!locked }; }
 
 const SEED_TEMPLATES=[
 tplDef('engagement','Engagement Letter / Client Care','all',[
@@ -1739,83 +1740,84 @@ function getCtx(clientId,matterId,extra){
   };
   return ctx;
 }
-function fillBody(body,ctx){
-  if(!body)return '';
-  return body.replace(/\{\{([a-zA-Z0-9_.]+)\}\}/g,(m,path)=>{
-    const v=get(ctx,path);
-    if(v==null||v==='')return '<span class="placeholder-empty">{{'+path+'}}</span>';
-    return esc(String(v));
+function fillBody(body, ctx) {
+  if (!body) return '';
+  return toText(body).replace(/\{\{([a-zA-Z0-9_.]+)\}\}/g, (m, path) => {
+    const v = get(ctx, path);
+    if (v == null || v === '') return '<span class="placeholder-empty">{{' + path + '}}</span>';
+    return esc(v);
   });
 }
-function mdToHtml(md){
-  if(!md)return '';
-  let s=esc(md);
-  s=s.replace(/&lt;span class=&quot;placeholder-empty&quot;&gt;/g,'<span class="placeholder-empty">')
-     .replace(/&lt;\/span&gt;/g,'</span>');
-  s=s.replace(/\[SIGNATURE_BLOCK\]/g,'<div class="sig-block"><strong>Signed:</strong> ______________________________  <strong>Date:</strong> ____________<br><br><strong>Print name:</strong> ______________________________</div>');
-  s=s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
-  const lines=s.split('\n');
-  let out=[],inUL=false,inOL=false;
-  for(let line of lines){
-    if(/^\s*-\s+/.test(line)){
-      if(!inUL){if(inOL){out.push('</ol>');inOL=false;}out.push('<ul>');inUL=true;}
-      out.push('<li>'+line.replace(/^\s*-\s+/,'')+'</li>');
-    }else if(/^\s*\d+\.\s+/.test(line)){
-      if(!inOL){if(inUL){out.push('</ul>');inUL=false;}out.push('<ol>');inOL=true;}
-      out.push('<li>'+line.replace(/^\s*\d+\.\s+/,'')+'</li>');
-    }else{
-      if(inUL){out.push('</ul>');inUL=false;}
-      if(inOL){out.push('</ol>');inOL=false;}
-      if(line.trim()==='')out.push('');
-      else if(/^---$/.test(line.trim()))out.push('<hr>');
-      else out.push('<p>'+line+'</p>');
+function mdToHtml(md) {
+  if (!md) return '';
+  let s = esc(md);
+  s = s.replace(/&lt;span class=&quot;placeholder-empty&quot;&gt;/g, '<span class="placeholder-empty">')
+    .replace(/&lt;\/span&gt;/g, '</span>');
+  s = s.replace(/\[SIGNATURE_BLOCK\]/g, '<div class="sig-block"><strong>Signed:</strong> ______________________________  <strong>Date:</strong> ____________<br><br><strong>Print name:</strong> ______________________________</div>');
+  s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  const out = []; let inUL = false, inOL = false;
+  for (const line of s.split('\n')) {
+    if (/^\s*-\s+/.test(line)) {
+      if (!inUL) { if (inOL) { out.push('</ol>'); inOL = false; } out.push('<ul>'); inUL = true; }
+      out.push('<li>' + line.replace(/^\s*-\s+/, '') + '</li>');
+    } else if (/^\s*\d+\.\s+/.test(line)) {
+      if (!inOL) { if (inUL) { out.push('</ul>'); inUL = false; } out.push('<ol>'); inOL = true; }
+      out.push('<li>' + line.replace(/^\s*\d+\.\s+/, '') + '</li>');
+    } else {
+      if (inUL) { out.push('</ul>'); inUL = false; }
+      if (inOL) { out.push('</ol>'); inOL = false; }
+      if (line.trim() === '') out.push('');
+      else if (/^---$/.test(line.trim())) out.push('<hr>');
+      else out.push('<p>' + line + '</p>');
     }
   }
-  if(inUL)out.push('</ul>');
-  if(inOL)out.push('</ol>');
+  if (inUL) out.push('</ul>');
+  if (inOL) out.push('</ol>');
   return out.join('\n');
+}
+function sectionsHtml(tpl, ctx, overrides) {
+  const ov = Object(overrides);
+  const parts = [];
+  const missing = [];
+  for (const s of (Array.isArray(Object(tpl).sections) ? tpl.sections : [])) {
+    const cust = ov[s.id];
+    const headingHtml = s.heading ? mdToHtml(fillBody(s.heading, ctx)) : '';
+    let bodyHtml = cust;
+    if (cust == null) {
+      bodyHtml = mdToHtml(fillBody(s.body, ctx));
+      for (const f of (s.requiredFields || [])) { const v = get(ctx, f); if (v == null || v === '') missing.push({ sec: s.id, field: f }); }
+    }
+    parts.push(`<div class="section ${s.locked ? 'locked-clause' : ''}" data-sec="${esc(s.id)}">${headingHtml}<div class="editable" contenteditable="${s.locked ? 'false' : 'true'}" data-sec-body="${esc(s.id)}">${bodyHtml}</div></div>`);
+  }
+  return { html: parts.join('\n'), missing };
+}
+function sectionsMarkdown(tpl, ctx, overrides) {
+  const ov = Object(overrides);
+  const t = Object(tpl);
+  const lines = ['# ' + t.name, ''];
+  for (const s of (Array.isArray(t.sections) ? t.sections : [])) {
+    if (s.heading) { lines.push('## ' + fillBodyMd(s.heading, ctx)); lines.push(''); }
+    lines.push(ov[s.id] != null ? stripHtml(ov[s.id]) : fillBodyMd(s.body, ctx)); lines.push('');
+  }
+  return lines.join('\n');
 }
 function renderTemplate(tplId,clientId,matterId,extra){
   const tpl=state.templates.find(t=>t.id===tplId);
   if(!tpl)return {html:'<p>Template not found</p>',missing:[]};
-  const ctx=getCtx(clientId,matterId,extra);
-  const overrides=(extra&&extra.overrides)||{};
-  const parts=[];
-  const missing=[];
-  for(const s of tpl.sections){
-    const cust=overrides[s.id];
-    const headingHtml=s.heading?mdToHtml(fillBody(s.heading,ctx)):'';
-    if(cust!=null){
-      parts.push(`<div class="section ${s.locked?'locked-clause':''}" data-sec="${esc(s.id)}">${headingHtml}<div class="editable" contenteditable="${s.locked?'false':'true'}" data-sec-body="${esc(s.id)}">${cust}</div></div>`);
-    }else{
-      const bodyHtml=mdToHtml(fillBody(s.body,ctx));
-      for(const f of (s.requiredFields||[])){const v=get(ctx,f);if(v==null||v==='')missing.push({sec:s.id,field:f});}
-      parts.push(`<div class="section ${s.locked?'locked-clause':''}" data-sec="${esc(s.id)}">${headingHtml}<div class="editable" contenteditable="${s.locked?'false':'true'}" data-sec-body="${esc(s.id)}">${bodyHtml}</div></div>`);
-    }
-  }
-  return {html:parts.join('\n'),missing};
+  return sectionsHtml(tpl,getCtx(clientId,matterId,extra),(extra&&extra.overrides)||{});
 }
 function renderMarkdown(tpl,clientId,matterId,extra){
-  const ctx=getCtx(clientId,matterId,extra);
-  const overrides=(extra&&extra.overrides)||{};
-  const lines=[];
-  lines.push('# '+tpl.name);lines.push('');
-  for(const s of tpl.sections){
-    if(s.heading){lines.push('## '+fillBodyMd(s.heading,ctx));lines.push('');}
-    const body=overrides[s.id]!=null?stripHtml(overrides[s.id]):fillBodyMd(s.body,ctx);
-    lines.push(body);lines.push('');
-  }
-  return lines.join('\n');
+  return sectionsMarkdown(tpl,getCtx(clientId,matterId,extra),(extra&&extra.overrides)||{});
 }
-function fillBodyMd(body,ctx){
-  if(!body)return '';
-  return body.replace(/\{\{([a-zA-Z0-9_.]+)\}\}/g,(m,path)=>{
-    const v=get(ctx,path);
-    if(v==null||v==='')return '«'+path+'»';
-    return String(v);
+function fillBodyMd(body, ctx) {
+  if (!body) return '';
+  return toText(body).replace(/\{\{([a-zA-Z0-9_.]+)\}\}/g, (m, path) => {
+    const v = get(ctx, path);
+    if (v == null || v === '') return '«' + path + '»';
+    return toText(v);
   });
 }
-function stripHtml(s){return String(s).replace(/<br\s*\/?>/g,'\n').replace(/<\/p>/g,'\n').replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");}
+function stripHtml(s) { return toText(s).replace(/<br\s*\/?>/g, '\n').replace(/<\/p>/g, '\n').replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'"); }
 
 function standaloneHtml(innerHtml,title){
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(title||'Document')}</title>
@@ -1826,7 +1828,7 @@ h3{font-size:13px}
 .locked-clause{padding:6px 10px;background:rgba(184,151,74,0.06);border-left:2px solid #b8974a;margin:6px 0}
 .sig-block{margin-top:24px;padding:14px;border:1px dashed #cfc7b3}
 .placeholder-empty{background:#ffe9b3;color:#8b1a1a;padding:0 4px}</style>
-</head><body><div class="paper">${innerHtml}</div>
+</head><body><div class="paper">${toText(innerHtml)}</div>
 
 </body></html>`;
 }
@@ -1839,13 +1841,23 @@ const T0_RULES=[
   {q:'What is the cap on a DBA payment?',a:'25% of damages in personal injury (first instance), 35% in employment tribunal claims, 50% in all other civil/commercial claims (first instance). All caps INCLUDE VAT (DBA Regs 2013, regs 4 and 7).'},
   {q:'What are the client-care requirements?',a:'SRA Code paras 8.6–8.11: tell the client at the outset who is handling their matter, their status, supervisors; complaints right (LeO and SRA routes); pricing/costs information; regulatory information about the firm. Update these whenever materially changed.'},
   {q:'How does a client complain to the Legal Ombudsman?',a:'After exhausting the firm internal procedure (firm has 8 weeks to give a final response). Refer within 6 months of final response AND within 1 year of the act/omission (or within 1 year of when they reasonably should have known). LeO: PO Box 6167, Slough SL1 0EH · 0300 555 0333 · enquiries@legalombudsman.org.uk.'},
-  {q:'What are the pre-action protocol limits?',a:'CPR Practice Direction on Pre-Action Conduct: exchange enough information to understand each other position, consider ADR, act proportionately. Typical reply periods in specific protocols range from 14 days (debt) to 4 months (clinical negligence response). A standard Letter Before Action conventionally gives 14 days for substantive response.'},
+  {q:'What are the pre-action protocol limits?',a:'CPR Practice Direction on Pre-Action Conduct: exchange enough information to understand each other position, consider ADR, act proportionately. The defendant should reply within a reasonable time: 14 days in a straightforward case and no more than 3 months in a very complex one (PD Pre-Action Conduct para 6(b)). Specific protocols set their own periods: a debtor has 30 days to reply under the Debt Claims protocol; a clinical negligence response is due within 4 months.'},
   {q:'How should we handle a vulnerable client?',a:'(1) Identify drivers — health, life event, resilience, capability. (2) Capacity test under MCA 2005 s.3 is decision-specific and time-specific; presume capacity. (3) Adjust communication: plain English, extra time, written follow-up, trusted-third-party support (not substitute). (4) Take instructions in private if undue influence suspected. (5) Document everything; review at every substantive meeting.'},
   {q:'What is the position on section 21 reform?',a:'Section 21 "no-fault" possession was abolished for private tenancies in England on 1 May 2026 (Renters\' Rights Act 2025): every private tenancy became an assured periodic tenancy, and possession is now only on a section 8 ground, with a notice on Form 3A and a court order. Section 21 notices served before 1 May 2026 could usually be used for up to 6 months or until 31 July 2026, whichever was sooner. Wales had already moved to the Renting Homes (Wales) Act 2016 model.'},
   {q:'What are the grounds for challenging a Will?',a:'(1) Lack of testamentary capacity (Banks v Goodfellow). (2) Lack of knowledge and approval. (3) Undue influence (high bar — actual influence, not just opportunity). (4) Forgery / fraud. (5) Improper execution under Wills Act 1837 s.9. (6) Revocation. Separately under the Inheritance (Provision for Family and Dependants) Act 1975 — claim for reasonable financial provision (not a challenge to the will itself).'},
   {q:'What is the LPA registration fee?',a:'£92 per LPA (one fee for Property & Financial Affairs, one for Health & Welfare) — Office of the Public Guardian fee from 17 November 2025 (verify before submission, fees periodically updated). Remissions and exemptions are available for donors on low income or in receipt of certain means-tested benefits.'},
   {q:'When must ATE insurance be disclosed?',a:'Since 1 April 2013 (LASPO), ATE premiums are no longer recoverable from the losing opponent (except, in clinical negligence cases, the part of the premium relating to expert reports on liability and causation). The client must be told this clearly. CPR 44 requires costs budgeting/management which records insurance position. The client must also be advised on alternative funding options before signing any CFA or DBA (SRA Code para 8.7).'}
 ];
+function matchT0(q) {
+  const ql = (typeof q === 'string' ? q : '').toLowerCase();
+  for (const r of T0_RULES) {
+    const ks = r.q.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 4).concat((r.q.match(/\b[A-Z]{3,}\b/g) || []).map((w) => w.toLowerCase()));
+    let hits = 0;
+    for (const w of ks) { if (ql.includes(w)) hits++; }
+    if (hits >= 2) return r;
+  }
+  return null;
+}
 
 /* ============================== RENDER ============================== */
 function render(){
@@ -2164,7 +2176,7 @@ const actions={
     state.ui.chatLog.push({who:'you',text:q,tier:''});
     const ql=q.toLowerCase();
     let matched=null;
-    for(const r of T0_RULES){const k=r.q.toLowerCase();const ks=k.split(/[^a-z]+/).filter(w=>w.length>4);let hits=0;for(const w of ks){if(ql.includes(w))hits++;}if(hits>=2){matched=r;break;}}
+    matched=matchT0(q);
     if(matched){state.ui.chatLog.push({who:'bot',text:matched.a,tier:'T0'});render();return;}
     if(!state.settings.anthropicKey){state.ui.chatLog.push({who:'bot',text:'No T0 rule matched. Set an Anthropic API key in Settings for T3 fallback.',tier:'T0'});render();return;}
     state.ui.chatLog.push({who:'bot',text:'…',tier:'T3'});render();
